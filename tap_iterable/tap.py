@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from singer_sdk import Tap
 from singer_sdk import typing as th  # JSON schema typing helpers
+from typing_extensions import override
 
-# TODO: Import your custom stream types here:
 from tap_iterable import streams
 
 
@@ -43,15 +43,34 @@ class TapIterable(Tap):
         ),
     ).to_dict()
 
+    @override
     def discover_streams(self) -> list[streams.IterableStream]:
-        """Return a list of discovered streams.
-
-        Returns:
-            A list of discovered streams.
-        """
         return [
-            streams.GroupsStream(self),
-            streams.UsersStream(self),
+            streams.ListsStream(self),
+            streams.ListUsersStream(self),
+            streams.CampaignsStream(self),
+            streams.ChannelsStream(self),
+            streams.MessageTypesStream(self),
+            streams.TemplatesStream(self),
+            streams.MetadataStream(self),
+            streams.EmailBounceStream(self),
+            streams.EmailClickStream(self),
+            streams.EmailComplaintStream(self),
+            streams.EmailOpenStream(self),
+            streams.EmailSendStream(self),
+            streams.EmailSendSkipStream(self),
+            streams.EmailSubscribeStream(self),
+            streams.EmailUnsubscribeStream(self),
+            streams.SMSBounceStream(self),
+            streams.SMSClickStream(self),
+            streams.SMSReceivedStream(self),
+            streams.SMSSendStream(self),
+            streams.SMSSendSkipStream(self),
+            streams.WebPushClickStream(self),
+            streams.WebPushSendStream(self),
+            streams.WebPushSendSkipStream(self),
+            # streams.UsersStream(self),
+            streams.CustomEventStream(self),
         ]
 
 

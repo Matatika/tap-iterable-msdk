@@ -16,6 +16,12 @@
         "string"
       ]
     },
+    "description": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
     "createdAt": {
       "type": [
         "null",
@@ -27,6 +33,12 @@
       "type": [
         "null",
         "string"
+      ],
+      "enum": [
+        "Standard",
+        "Dynamic",
+        "Suppression",
+        "Internal"
       ]
     }
   }

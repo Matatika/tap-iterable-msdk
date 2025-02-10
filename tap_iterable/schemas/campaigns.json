@@ -54,6 +54,12 @@
       "type": [
         "null",
         "string"
+      ],
+      "enum": [
+        "Email",
+        "Push",
+        "InApp",
+        "SMS"
       ]
     },
     "createdByUserId": {
@@ -66,6 +72,16 @@
       "type": [
         "null",
         "string"
+      ],
+      "enum": [
+        "Draft",
+        "Ready",
+        "Scheduled",
+        "Running",
+        "Finished",
+        "Starting",
+        "Aborted",
+        "Recurring"
       ]
     },
     "listIds": {
@@ -73,14 +89,18 @@
         "null",
         "array"
       ],
-      "items": {}
+      "items": {
+        "type": "integer"
+      }
     },
     "suppressionListIds": {
       "type": [
         "null",
         "array"
       ],
-      "items": {}
+      "items": {
+        "type": "integer"
+      }
     },
     "sendSize": {
       "type": [
@@ -105,12 +125,18 @@
         "null",
         "array"
       ],
-      "items": {}
+      "items": {
+        "type": "string"
+      }
     },
     "type": {
       "type": [
         "null",
         "string"
+      ],
+      "enum": [
+        "Blast",
+        "Triggered"
       ]
     }
   }

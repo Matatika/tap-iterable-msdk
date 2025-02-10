@@ -15,13 +15,6 @@
         "null",
         "integer"
       ]
-    },
-    "updatedAt": {
-      "type": [
-        "null",
-        "string"
-      ],
-      "format": "date-time"
     }
   }
 }

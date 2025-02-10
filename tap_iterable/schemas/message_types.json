@@ -10,6 +10,20 @@
         "number"
       ]
     },
+    "createdAt": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
     "name": {
       "type": [
         "null",
@@ -20,6 +34,16 @@
       "type": [
         "null",
         "number"
+      ]
+    },
+    "subscriptionPolicy": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "enum": [
+        "OptIn",
+        "OptOut"
       ]
     }
   }

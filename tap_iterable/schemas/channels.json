@@ -20,12 +20,22 @@
       "type": [
         "null",
         "string"
+      ],
+      "enum": [
+        "Marketing",
+        "Transactional"
       ]
     },
     "messageMedium": {
       "type": [
         "null",
         "string"
+      ],
+      "enum": [
+        "Email",
+        "Push",
+        "InApp",
+        "SMS"
       ]
     }
   }

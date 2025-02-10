@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import decimal
 import typing as t
+from datetime import datetime, timezone
 from functools import cached_property
 from importlib import resources
 
@@ -18,15 +19,11 @@ if t.TYPE_CHECKING:
     from singer_sdk.helpers.types import Context
 
 
-# TODO: Delete this is if not using json files for schema definition
 SCHEMAS_DIR = resources.files(__package__) / "schemas"
 
 
 class IterableStream(RESTStream):
     """Iterable stream class."""
-
-    # Update this value if necessary or override `parse_response`.
-    records_jsonpath = "$[*]"
 
     # Update this value if necessary or override `get_new_paginator`.
     next_page_token_jsonpath = "$.next_page"  # noqa: S105
@@ -131,19 +128,30 @@ class IterableStream(RESTStream):
             input=response.json(parse_float=decimal.Decimal),
         )
 
-    def post_process(
-        self,
-        row: dict,
-        context: Context | None = None,  # noqa: ARG002
-    ) -> dict | None:
-        """As needed, append or transform raw data to match expected structure.
+    @cached_property
+    def _date_time_properties(self):
+        properties: dict[str, dict] = self.schema["properties"]
 
-        Args:
-            row: An individual record from the stream.
-            context: The stream context.
+        return {
+            name
+            for name, schema in properties.items()
+            if schema.get("format") == "date-time"
+        }
 
-        Returns:
-            The updated record dictionary, or ``None`` to skip the record.
-        """
-        # TODO: Delete this method if not needed.
+    @override
+    def post_process(self, row, context=None):
+        for name in self._date_time_properties:
+            value = row.get(name)
+
+            if not value:
+                continue
+
+            if isinstance(value, int):
+                date_time = datetime.fromtimestamp(
+                    value / 1000,  # assume timestamp in milliseconds
+                    tz=timezone.utc,
+                )
+
+            row[name] = date_time.isoformat()
+
         return row
