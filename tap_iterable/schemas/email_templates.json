@@ -1,0 +1,170 @@
+{
+  "type": [
+    "null",
+    "object"
+  ],
+  "properties": {
+    "templateId": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "metadata": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "templateId": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        },
+        "createdAt": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        },
+        "updatedAt": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        },
+        "name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "creatorUserId": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "messageTypeId": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        }
+      }
+    },
+    "name": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "fromName": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "fromEmail": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "email"
+    },
+    "replyToEmail": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "email"
+    },
+    "subject": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "preheaderText": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "ccEmails": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ],
+        "format": "email"
+      }
+    },
+    "bccEmails": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ],
+        "format": "email"
+      }
+    },
+    "html": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "plainText": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "dataFeedIds": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      }
+    },
+    "cacheDataFeed": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "mergeDataFeedContext": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "creatorUserId": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "messageTypeId": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    }
+  }
+}

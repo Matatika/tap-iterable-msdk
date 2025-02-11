@@ -46,12 +46,14 @@ class TapIterable(Tap):
     @override
     def discover_streams(self) -> list[streams.IterableStream]:
         return [
+            streams._MessageMediumsStream(self),  # noqa: SLF001
             streams.ListsStream(self),
             streams.ListUsersStream(self),
             streams.CampaignsStream(self),
             streams.ChannelsStream(self),
             streams.MessageTypesStream(self),
             streams.TemplatesStream(self),
+            streams.EmailTemplatesStream(self),
             streams.MetadataStream(self),
             streams.EmailBounceStream(self),
             streams.EmailClickStream(self),

@@ -6,6 +6,8 @@ import decimal
 import json
 from importlib import resources
 
+from singer_sdk import typing as th
+from singer_sdk.streams import Stream
 from typing_extensions import override
 
 from tap_iterable.client import IterableStream
@@ -82,9 +84,26 @@ class MessageTypesStream(IterableStream):
     schema_filepath = SCHEMAS_DIR / "message_types.json"
 
 
+class _MessageMediumsStream(Stream):
+    """Define message mediums stream."""
+
+    name = "_message_mediums"
+    schema = th.ObjectType().to_dict()
+    selected = False  # use for context generation only
+
+    @override
+    def get_records(self, context):
+        yield from ({"messageMedium": m} for m in ["Email", "Push", "InApp", "SMS"])
+
+    @override
+    def get_child_context(self, record, context):
+        return record
+
+
 class TemplatesStream(IterableStream):
     """Define templates stream."""
 
+    parent_stream_type = _MessageMediumsStream
     name = "templates"
     path = "/templates"
     records_jsonpath = "$.templates[*]"
@@ -99,6 +118,34 @@ class TemplatesStream(IterableStream):
 
         if start_date := self.get_starting_timestamp(context):
             params["startDateTime"] = start_date.strftime(r"%Y-%m-%d %H:%M:%S")
+
+        return params
+
+    @override
+    def get_child_context(self, record, context):
+        return {**context, "templateId": record["templateId"]}
+
+
+class EmailTemplatesStream(IterableStream):
+    """Define email templates stream."""
+
+    parent_stream_type = TemplatesStream
+    name = "email_templates"
+    path = "/templates/email/get"
+    schema_filepath = SCHEMAS_DIR / "email_templates.json"
+    key_properties = ("templateId",)
+
+    @override
+    def get_records(self, context):
+        if context["messageMedium"] != "Email":
+            return
+
+        yield from super().get_records(context)
+
+    @override
+    def get_url_params(self, context, next_page_token):
+        params = super().get_url_params(context, next_page_token)
+        params["templateId"] = context["templateId"]
 
         return params
 
