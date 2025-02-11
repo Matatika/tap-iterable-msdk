@@ -47,6 +47,8 @@ class TapIterable(Tap):
     def discover_streams(self) -> list[streams.IterableStream]:
         return [
             streams._MessageMediumsStream(self),  # noqa: SLF001
+            streams._MetadataStream(self),  # noqa: SLF001
+            streams._MetadataTablesStream(self),  # noqa: SLF001
             streams.ListsStream(self),
             streams.ListUsersStream(self),
             streams.CampaignsStream(self),

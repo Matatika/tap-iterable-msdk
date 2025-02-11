@@ -150,27 +150,43 @@ class EmailTemplatesStream(IterableStream):
         return params
 
 
+class _MetadataStream(IterableStream):
+    """Define metadata stream."""
+
+    name = "_metadata"
+    path = "/metadata"
+    schema = th.ObjectType().to_dict()
+    selected = False  # use for context generation only
+    records_jsonpath = "$.results[*]"
+
+    @override
+    def get_child_context(self, record, context):
+        return {"table": record["name"]}
+
+
+class _MetadataTablesStream(IterableStream):
+    """Define metadata tables stream."""
+
+    parent_stream_type = _MetadataStream
+    name = "_metadata_tables"
+    path = "/metadata/{table}"
+    schema = th.ObjectType().to_dict()
+    selected = False  # use for context generation only
+    records_jsonpath = "$.results[*]"
+
+    @override
+    def get_child_context(self, record, context):
+        return {**context, "key": record["key"]}
+
+
 class MetadataStream(IterableStream):
     """Define metadata stream."""
 
+    parent_stream_type = _MetadataTablesStream
     name = "metadata"
+    path = "/metadata/{table}/{key}"
     schema_filepath = SCHEMAS_DIR / "metadata.json"
     primary_keys = ("key",)
-
-    @override
-    def request_records(self, context):
-        self.path = "/metadata"
-        response = self.requests_session.send(self.prepare_request(context, None))
-        self.validate_response(response)
-
-        for table in response.json()["results"]:
-            self.path = "/metadata/{name}".format(**table)
-            response = self.requests_session.send(self.prepare_request(context, None))
-            self.validate_response(response)
-
-            for keys in response.json()["results"]:
-                self.path = "/metadata/{table}/{key}".format(**keys)
-                yield from super().request_records(context)
 
 
 # https://api.iterable.com/api/docs#export_exportDataJson
