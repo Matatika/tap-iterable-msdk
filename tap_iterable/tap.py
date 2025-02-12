@@ -73,7 +73,7 @@ class TapIterable(Tap):
             streams.WebPushClickStream(self),
             streams.WebPushSendStream(self),
             streams.WebPushSendSkipStream(self),
-            # streams.UsersStream(self),
+            streams.UsersStream(self),
             streams.CustomEventStream(self),
         ]
 

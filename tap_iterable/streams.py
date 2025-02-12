@@ -403,9 +403,27 @@ class UsersStream(_ExportStream):
     """Define users export stream."""
 
     name = "users"
-    primary_keys = ("userId",)
+    primary_keys = ("userId", "email")
+    replication_key = "profileUpdatedAt"
 
     data_type_name = "user"
+
+    @override
+    def post_process(self, row, context=None):
+        row: dict[str] = super().post_process(row, context)
+
+        # loosely following convention from https://api.iterable.com/api/docs#users_getUserById,
+        # use a `dataFields` schema property as to encapsulate all project-specific user
+        # fields in order to avoid overhead/complexity of dynamic discovery
+
+        data_fields = {
+            f: row.pop(f) for f in row.copy() if f not in self.schema["properties"]
+        }
+
+        return {
+            **row,
+            "dataFields": data_fields,
+        }
 
 
 class CustomEventStream(_ExportStream):
