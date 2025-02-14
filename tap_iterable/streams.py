@@ -6,6 +6,7 @@ import decimal
 import json
 from importlib import resources
 
+import requests
 from singer_sdk import typing as th
 from singer_sdk.streams import Stream
 from typing_extensions import override
@@ -242,10 +243,11 @@ class _ExportStream(IterableStream):
     @override
     def parse_response(self, response):
         with response:  # ensure connection is eventually released
-            yield from (
-                json.loads(line, parse_float=decimal.Decimal)
-                for line in response.iter_lines()
-            )
+            try:
+                for line in response.iter_lines():
+                    yield json.loads(line, parse_float=decimal.Decimal)
+            except requests.exceptions.ChunkedEncodingError as e:
+                self.logger.warning("Invalid chunk received, skipping", exc_info=e)
 
     @override
     def post_process(self, row, context=None):
