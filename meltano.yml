@@ -21,6 +21,15 @@ plugins:
       label: API key
       description: Iterable API key
       sensitive: true
+    - name: region
+      label: Region
+      description: Iterable region
+      kind: options
+      options:
+      - label: US
+        value: US
+      - label: EU
+        value: EU
     - name: start_date
       kind: date_iso8601
       label: Start date
