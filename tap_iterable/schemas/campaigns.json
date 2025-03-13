@@ -59,7 +59,8 @@
         "Email",
         "Push",
         "InApp",
-        "SMS"
+        "SMS",
+        "WebPush"
       ]
     },
     "createdByUserId": {

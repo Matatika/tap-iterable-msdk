@@ -35,7 +35,8 @@
         "Email",
         "Push",
         "InApp",
-        "SMS"
+        "SMS",
+        "WebPush"
       ]
     }
   }
