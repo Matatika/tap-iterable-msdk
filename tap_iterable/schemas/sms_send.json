@@ -4,45 +4,76 @@
     "object"
   ],
   "properties": {
-    "createdAt": {
+    "mmsSendCount": {
       "type": [
-        "null",
-        "string"
-      ],
-      "format": "date-time"
+        "integer",
+        "null"
+      ]
+    },
+    "fromSMSSenderId": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "catalogLookupCount": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "templateId": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "messageId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "catalogCollectionCount": {
+      "type": [
+        "integer",
+        "null"
+      ]
     },
     "campaignId": {
       "type": [
-        "null",
-        "integer"
+        "integer",
+        "null"
       ]
     },
-    "itblInternal": {
+    "smsSendCount": {
       "type": [
-        "null",
-        "object"
-      ],
-      "properties": {
-        "documentCreatedAt": {
-          "type": [
-            "null",
-            "string"
-          ],
-          "format": "date-time"
-        },
-        "documentUpdatedAt": {
-          "type": [
-            "null",
-            "string"
-          ],
-          "format": "date-time"
-        }
-      }
+        "integer",
+        "null"
+      ]
+    },
+    "channelId": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "email": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "isSMSEstimation": {
+      "type": [
+        "boolean",
+        "null"
+      ]
     },
     "messageTypeId": {
       "type": [
-        "null",
-        "integer"
+        "integer",
+        "null"
       ]
     },
     "transactionalData": {
@@ -204,40 +235,81 @@
         }
       }
     },
-    "contentId": {
+    "billingParty": {
       "type": [
-        "null",
-        "integer"
+        "string",
+        "null"
       ]
     },
-    "messageId": {
+    "toPhoneNumber": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "espAccountId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "renderedSmsMessage": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "espName": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "createdAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "productRecommendationCount": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "contentId": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "itblInternal": {
       "type": [
         "null",
-        "string"
-      ]
+        "object"
+      ],
+      "properties": {
+        "documentCreatedAt": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "format": "date-time"
+        },
+        "documentUpdatedAt": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "format": "date-time"
+        }
+      }
     },
     "messageBusId": {
       "type": [
         "null",
         "string"
-      ]
-    },
-    "templateId": {
-      "type": [
-        "null",
-        "integer"
-      ]
-    },
-    "email": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "channelId": {
-      "type": [
-        "null",
-        "integer"
       ]
     }
   }
