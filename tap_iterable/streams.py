@@ -16,7 +16,6 @@ from singer_sdk import typing as th
 from singer_sdk.streams import Stream
 from typing_extensions import override
 
-from tap_iterable import RateType
 from tap_iterable.client import IterableStream
 
 SCHEMAS_DIR = resources.files(__package__) / "schemas"
@@ -477,7 +476,7 @@ class ExperimentMetrics(IterableStream):
         th.Property("confidence", th.StringType),
         th.Property("totalEmailSends", th.IntegerType),
         th.Property("uniqueEmailSends", th.IntegerType),
-        th.Property("emailDeliveryRate", RateType),
+        th.Property("emailDeliveryRate", th.NumberType),
         th.Property("totalEmailsDelivered", th.IntegerType),
         th.Property("uniqueEmailsDelivered", th.IntegerType),
         th.Property("totalEmailOpens", th.IntegerType),
@@ -485,23 +484,23 @@ class ExperimentMetrics(IterableStream):
         th.Property("uniqueEmailOpens", th.IntegerType),
         th.Property("uniqueEmailOpensFiltered", th.IntegerType),
         th.Property("uniqueEmailOpensOrClicks", th.IntegerType),
-        th.Property("emailOpenRate", RateType),
-        th.Property("uniqueEmailOpenRate", RateType),
+        th.Property("emailOpenRate", th.NumberType),
+        th.Property("uniqueEmailOpenRate", th.NumberType),
         th.Property("totalEmailsClicked", th.IntegerType),
         th.Property("uniqueEmailClicks", th.IntegerType),
         th.Property("clicksOpens", th.NumberType),
-        th.Property("emailClickRate", RateType),
-        th.Property("uniqueEmailClickRate", RateType),
+        th.Property("emailClickRate", th.NumberType),
+        th.Property("uniqueEmailClickRate", th.NumberType),
         th.Property("totalComplaints", th.IntegerType),
-        th.Property("complaintRate", RateType),
+        th.Property("complaintRate", th.NumberType),
         th.Property("totalEmailsBounced", th.IntegerType),
         th.Property("uniqueEmailsBounced", th.IntegerType),
-        th.Property("emailBounceRate", RateType),
+        th.Property("emailBounceRate", th.NumberType),
         th.Property("totalEmailHoldout", th.IntegerType),
         th.Property("totalEmailSendSkips", th.IntegerType),
         th.Property("totalUnsubscribes", th.IntegerType),
         th.Property("uniqueUnsubscribes", th.IntegerType),
-        th.Property("emailUnsubscribeRate", RateType),
+        th.Property("emailUnsubscribeRate", th.NumberType),
         th.Property("revenue", th.NumberType),
         th.Property("totalPurchases", th.IntegerType),
         th.Property("uniquePurchases", th.IntegerType),
