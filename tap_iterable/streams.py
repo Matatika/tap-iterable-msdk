@@ -9,8 +9,10 @@ import json
 import math
 import re
 import tempfile
+from http import HTTPStatus
 from importlib import resources
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import humps
 from singer_sdk import typing as th
@@ -19,7 +21,22 @@ from typing_extensions import override
 
 from tap_iterable.client import IterableStream
 
+if TYPE_CHECKING:
+    import requests
+
 SCHEMAS_DIR = resources.files(__package__) / "schemas"
+
+
+class _ResumableAPIError(Exception):
+    def __init__(self, response: requests.Response) -> None:
+        msg = f"Resuming from API {response.status_code} {response.reason} response"
+
+        if response.text:
+            msg += f": {response.text}"
+
+        super().__init__(msg)
+
+        self.response = response
 
 
 class ListsStream(IterableStream):
@@ -522,6 +539,20 @@ class ExperimentMetrics(IterableStream):
     # disable default pagination logic as this endpoint response is not JSON (and does
     # not support pagination anyway)
     next_page_token_jsonpath = None
+
+    @override
+    def get_records(self, context):
+        try:
+            yield from super().get_records(context)
+        except _ResumableAPIError as e:
+            self.logger.warning(e)
+
+    @override
+    def validate_response(self, response):
+        if response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR:
+            raise _ResumableAPIError(response)
+
+        return super().validate_response(response)
 
     @override
     def parse_response(self, response):
