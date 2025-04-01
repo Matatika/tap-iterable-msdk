@@ -545,8 +545,7 @@ class ExperimentMetrics(IterableStream):
             value = row.pop(k)
 
             if value == "":
-                row[new_key] = None
-                continue
+                row[new_key] = value = None
 
             if value is None or not (property_schema := properties.get(new_key)):
                 continue
