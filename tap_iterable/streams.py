@@ -6,6 +6,7 @@ import csv
 import decimal
 import io
 import json
+import math
 import re
 import tempfile
 from importlib import resources
@@ -472,8 +473,8 @@ class ExperimentMetrics(IterableStream):
         th.Property("creationDate", th.DateTimeType),
         th.Property("lastModified", th.DateTimeType),
         th.Property("subject", th.StringType),
-        th.Property("improvement", th.StringType),
-        th.Property("confidence", th.StringType),
+        th.Property("improvement", th.NumberType),
+        th.Property("confidence", th.NumberType),
         th.Property("totalEmailSends", th.IntegerType),
         th.Property("uniqueEmailSends", th.IntegerType),
         th.Property("emailDeliveryRate", th.NumberType),
@@ -544,15 +545,36 @@ class ExperimentMetrics(IterableStream):
             value = row.pop(k)
 
             if value == "":
-                value = None
+                row[new_key] = None
+                continue
 
-            if value is not None:
-                property_types: list[str] = properties[new_key]["type"]
+            if value is None:
+                continue
 
-                if th.IntegerType.__type_name__ in property_types:
-                    value = int(decimal.Decimal(value))
-                elif th.NumberType.__type_name__ in property_types:
-                    value = float(decimal.Decimal(value))
+            property_types: list[str] = properties[new_key]["type"]
+
+            numeric_typecasts: dict[th._NumericType] = {
+                th.IntegerType: int,
+                th.NumberType: float,
+            }
+
+            numeric_typecast = next(
+                (
+                    numeric_typecasts[nt]
+                    for nt in numeric_typecasts
+                    if nt.__type_name__ in property_types
+                ),
+                None,
+            )  # get the first matching typecast if one exists
+
+            if numeric_typecast:
+                try:
+                    d = decimal.Decimal(value)
+                except decimal.DecimalException:
+                    d = decimal.Decimal(math.nan)
+                    self.logger.debug("Handling invalid decimal '%s' as %s", value, d)
+
+                value = numeric_typecast(d) if not d.is_nan() else None
 
             row[new_key] = value
 
