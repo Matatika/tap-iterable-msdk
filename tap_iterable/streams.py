@@ -543,7 +543,7 @@ class ExperimentMetrics(IterableStream):
 
             value = row.pop(k)
 
-            if len(value) == 0:
+            if value == "":
                 value = None
 
             if value is not None:
