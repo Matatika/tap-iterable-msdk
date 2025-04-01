@@ -224,9 +224,7 @@ class _ExportStream(IterableStream):
         params = super().get_url_params(context, next_page_token)
         params["dataTypeName"] = self.data_type_name
 
-        if start_date := self.get_starting_timestamp(context):
-            params["startDateTime"] = start_date.strftime(r"%Y-%m-%d %H:%M:%S")
-        else:
+        if "startDateTime" not in params:
             params["range"] = "All"
 
         return params
