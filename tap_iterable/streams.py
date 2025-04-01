@@ -533,7 +533,7 @@ class ExperimentMetrics(IterableStream):
     def post_process(self, row, context=None):
         row = super().post_process(row, context=context)
 
-        properties = self.schema["properties"]
+        properties: dict = self.schema["properties"]
 
         for k in list(row.keys()):
             new_key = k.lower()
@@ -548,10 +548,8 @@ class ExperimentMetrics(IterableStream):
                 row[new_key] = None
                 continue
 
-            if value is None:
+            if value is None or not (property_schema := properties.get(new_key)):
                 continue
-
-            property_types: list[str] = properties[new_key]["type"]
 
             numeric_typecasts: dict[th._NumericType] = {
                 th.IntegerType: int,
@@ -562,7 +560,7 @@ class ExperimentMetrics(IterableStream):
                 (
                     numeric_typecasts[nt]
                     for nt in numeric_typecasts
-                    if nt.__type_name__ in property_types
+                    if nt.__type_name__ in property_schema["type"]
                 ),
                 None,
             )  # get the first matching typecast if one exists
