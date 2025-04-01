@@ -571,7 +571,18 @@ class ExperimentMetrics(IterableStream):
                     d = decimal.Decimal(math.nan)
                     self.logger.debug("Handling invalid decimal '%s' as %s", value, d)
 
-                value = numeric_typecast(d) if not d.is_nan() else None
+                if d.is_nan() or d.is_infinite():
+                    value = None
+                    self.logger.debug(
+                        (
+                            "%s is not supported as a numeric value in JSON, handling "
+                            "as %s"
+                        ),
+                        d,
+                        value,
+                    )
+                else:
+                    value = numeric_typecast(d)
 
             row[new_key] = value
 
