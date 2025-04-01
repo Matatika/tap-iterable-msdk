@@ -517,6 +517,7 @@ class ExperimentMetrics(IterableStream):
     ).to_dict()
 
     primary_keys = ("campaignId", "experimentId", "templateId")
+    replication_key = "lastModified"
 
     # disable default pagination logic as this endpoint response is not JSON (and does
     # not support pagination anyway)
