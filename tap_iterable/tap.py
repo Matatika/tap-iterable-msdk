@@ -75,6 +75,7 @@ class TapIterable(Tap):
             streams.WebPushSendSkipStream(self),
             streams.UsersStream(self),
             streams.CustomEventStream(self),
+            streams.ExperimentMetrics(self),
         ]
 
 

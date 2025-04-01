@@ -2,19 +2,41 @@
 
 from __future__ import annotations
 
+import csv
 import decimal
+import io
 import json
+import math
+import re
 import tempfile
+from http import HTTPStatus
 from importlib import resources
 from pathlib import Path
+from typing import TYPE_CHECKING
 
+import humps
 from singer_sdk import typing as th
 from singer_sdk.streams import Stream
 from typing_extensions import override
 
 from tap_iterable.client import IterableStream
 
+if TYPE_CHECKING:
+    import requests
+
 SCHEMAS_DIR = resources.files(__package__) / "schemas"
+
+
+class _ResumableAPIError(Exception):
+    def __init__(self, response: requests.Response) -> None:
+        msg = f"Resuming from API {response.status_code} {response.reason} response"
+
+        if response.text:
+            msg += f": {response.text}"
+
+        super().__init__(msg)
+
+        self.response = response
 
 
 class ListsStream(IterableStream):
@@ -219,9 +241,7 @@ class _ExportStream(IterableStream):
         params = super().get_url_params(context, next_page_token)
         params["dataTypeName"] = self.data_type_name
 
-        if start_date := self.get_starting_timestamp(context):
-            params["startDateTime"] = start_date.strftime(r"%Y-%m-%d %H:%M:%S")
-        else:
+        if "startDateTime" not in params:
             params["range"] = "All"
 
         return params
@@ -451,3 +471,150 @@ class CustomEventStream(_ExportStream):
     primary_keys = ("createdAt", "email")
 
     data_type_name = "customEvent"
+
+
+class ExperimentMetrics(IterableStream):
+    """Define experiment metrics stream."""
+
+    name = "experiment_metrics"
+    path = "/experiments/metrics"
+
+    # https://support.iterable.com/hc/en-us/articles/213805923-Metric-Definitions
+    schema = th.PropertiesList(
+        th.Property("campaignId", th.IntegerType),
+        th.Property("experimentId", th.IntegerType),
+        th.Property("templateId", th.IntegerType),
+        th.Property("name", th.StringType),
+        th.Property("type", th.StringType),  # Control, Winner, -
+        th.Property("createdBy", th.EmailType),
+        th.Property("creationDate", th.DateTimeType),
+        th.Property("lastModified", th.DateTimeType),
+        th.Property("subject", th.StringType),
+        th.Property("improvement", th.NumberType),
+        th.Property("confidence", th.NumberType),
+        th.Property("totalEmailSends", th.IntegerType),
+        th.Property("uniqueEmailSends", th.IntegerType),
+        th.Property("emailDeliveryRate", th.NumberType),
+        th.Property("totalEmailsDelivered", th.IntegerType),
+        th.Property("uniqueEmailsDelivered", th.IntegerType),
+        th.Property("totalEmailOpens", th.IntegerType),
+        th.Property("totalEmailOpensFiltered", th.IntegerType),
+        th.Property("uniqueEmailOpens", th.IntegerType),
+        th.Property("uniqueEmailOpensFiltered", th.IntegerType),
+        th.Property("uniqueEmailOpensOrClicks", th.IntegerType),
+        th.Property("emailOpenRate", th.NumberType),
+        th.Property("uniqueEmailOpenRate", th.NumberType),
+        th.Property("totalEmailsClicked", th.IntegerType),
+        th.Property("uniqueEmailClicks", th.IntegerType),
+        th.Property("clicksOpens", th.NumberType),
+        th.Property("emailClickRate", th.NumberType),
+        th.Property("uniqueEmailClickRate", th.NumberType),
+        th.Property("totalComplaints", th.IntegerType),
+        th.Property("complaintRate", th.NumberType),
+        th.Property("totalEmailsBounced", th.IntegerType),
+        th.Property("uniqueEmailsBounced", th.IntegerType),
+        th.Property("emailBounceRate", th.NumberType),
+        th.Property("totalEmailHoldout", th.IntegerType),
+        th.Property("totalEmailSendSkips", th.IntegerType),
+        th.Property("totalUnsubscribes", th.IntegerType),
+        th.Property("uniqueUnsubscribes", th.IntegerType),
+        th.Property("emailUnsubscribeRate", th.NumberType),
+        th.Property("revenue", th.NumberType),
+        th.Property("totalPurchases", th.IntegerType),
+        th.Property("uniquePurchases", th.IntegerType),
+        th.Property("averageOrderValue", th.NumberType),
+        th.Property("purchasesPerMileEmail", th.NumberType),
+        th.Property("revenuePerMileEmail", th.NumberType),
+        th.Property("totalCustomConversions", th.IntegerType),
+        th.Property("uniqueCustomConversions", th.IntegerType),
+        th.Property("averageCustomConversionValue", th.NumberType),
+        th.Property("conversionsEmailHoldOuts", th.NumberType),
+        th.Property("conversionsUniqueEmailsDelivered", th.NumberType),
+        th.Property("sumOfCustomConversions", th.IntegerType),
+    ).to_dict()
+
+    primary_keys = ("campaignId", "experimentId", "templateId")
+    replication_key = "lastModified"
+
+    # disable default pagination logic as this endpoint response is not JSON (and does
+    # not support pagination anyway)
+    next_page_token_jsonpath = None
+
+    @override
+    def get_records(self, context):
+        try:
+            yield from super().get_records(context)
+        except _ResumableAPIError as e:
+            self.logger.warning(e)
+
+    @override
+    def validate_response(self, response):
+        if response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR:
+            raise _ResumableAPIError(response)
+
+        return super().validate_response(response)
+
+    @override
+    def parse_response(self, response):
+        with io.StringIO(response.text) as f:
+            reader = csv.DictReader(f)
+            yield from reader
+
+    @override
+    def post_process(self, row, context=None):
+        row = super().post_process(row, context=context)
+
+        properties: dict = self.schema["properties"]
+
+        for k in list(row.keys()):
+            new_key = k.lower()
+            new_key = new_key.replace("/ m", "per mile")
+            new_key = re.sub(r"\s", "_", new_key)
+            new_key = re.sub(r"[\W]", "", new_key)
+            new_key = humps.camelize(new_key)
+
+            value = row.pop(k)
+
+            if value == "":
+                row[new_key] = value = None
+
+            if value is None or not (property_schema := properties.get(new_key)):
+                continue
+
+            numeric_typecasts: dict[th._NumericType] = {
+                th.IntegerType: int,
+                th.NumberType: float,
+            }
+
+            numeric_typecast = next(
+                (
+                    numeric_typecasts[nt]
+                    for nt in numeric_typecasts
+                    if nt.__type_name__ in property_schema["type"]
+                ),
+                None,
+            )  # get the first matching typecast if one exists
+
+            if numeric_typecast:
+                try:
+                    d = decimal.Decimal(value)
+                except decimal.DecimalException:
+                    d = decimal.Decimal(math.nan)
+                    self.logger.debug("Handling invalid decimal '%s' as %s", value, d)
+
+                if d.is_nan() or d.is_infinite():
+                    value = None
+                    self.logger.debug(
+                        (
+                            "%s is not supported as a numeric value in JSON, handling "
+                            "as %s"
+                        ),
+                        d,
+                        value,
+                    )
+                else:
+                    value = numeric_typecast(d)
+
+            row[new_key] = value
+
+        return row
