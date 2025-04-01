@@ -2,16 +2,21 @@
 
 from __future__ import annotations
 
+import csv
 import decimal
+import io
 import json
+import re
 import tempfile
 from importlib import resources
 from pathlib import Path
 
+import humps
 from singer_sdk import typing as th
 from singer_sdk.streams import Stream
 from typing_extensions import override
 
+from tap_iterable import RateType
 from tap_iterable.client import IterableStream
 
 SCHEMAS_DIR = resources.files(__package__) / "schemas"
@@ -451,3 +456,106 @@ class CustomEventStream(_ExportStream):
     primary_keys = ("createdAt", "email")
 
     data_type_name = "customEvent"
+
+
+class ExperimentMetrics(IterableStream):
+    """Define experiment metrics stream."""
+
+    name = "experiment_metrics"
+    path = "/experiments/metrics"
+
+    # https://support.iterable.com/hc/en-us/articles/213805923-Metric-Definitions
+    schema = th.PropertiesList(
+        th.Property("campaignId", th.IntegerType),
+        th.Property("experimentId", th.IntegerType),
+        th.Property("templateId", th.IntegerType),
+        th.Property("name", th.StringType),
+        th.Property("type", th.StringType),  # Control, Winner, -
+        th.Property("createdBy", th.EmailType),
+        th.Property("creationDate", th.DateTimeType),
+        th.Property("lastModified", th.DateTimeType),
+        th.Property("subject", th.StringType),
+        th.Property("improvement", th.StringType),
+        th.Property("confidence", th.StringType),
+        th.Property("totalEmailSends", th.IntegerType),
+        th.Property("uniqueEmailSends", th.IntegerType),
+        th.Property("emailDeliveryRate", RateType),
+        th.Property("totalEmailsDelivered", th.IntegerType),
+        th.Property("uniqueEmailsDelivered", th.IntegerType),
+        th.Property("totalEmailOpens", th.IntegerType),
+        th.Property("totalEmailOpensFiltered", th.IntegerType),
+        th.Property("uniqueEmailOpens", th.IntegerType),
+        th.Property("uniqueEmailOpensFiltered", th.IntegerType),
+        th.Property("uniqueEmailOpensOrClicks", th.IntegerType),
+        th.Property("emailOpenRate", RateType),
+        th.Property("uniqueEmailOpenRate", RateType),
+        th.Property("totalEmailsClicked", th.IntegerType),
+        th.Property("uniqueEmailClicks", th.IntegerType),
+        th.Property("clicksOpens", th.NumberType),
+        th.Property("emailClickRate", RateType),
+        th.Property("uniqueEmailClickRate", RateType),
+        th.Property("totalComplaints", th.IntegerType),
+        th.Property("complaintRate", RateType),
+        th.Property("totalEmailsBounced", th.IntegerType),
+        th.Property("uniqueEmailsBounced", th.IntegerType),
+        th.Property("emailBounceRate", RateType),
+        th.Property("totalEmailHoldout", th.IntegerType),
+        th.Property("totalEmailSendSkips", th.IntegerType),
+        th.Property("totalUnsubscribes", th.IntegerType),
+        th.Property("uniqueUnsubscribes", th.IntegerType),
+        th.Property("emailUnsubscribeRate", RateType),
+        th.Property("revenue", th.NumberType),
+        th.Property("totalPurchases", th.IntegerType),
+        th.Property("uniquePurchases", th.IntegerType),
+        th.Property("averageOrderValue", th.NumberType),
+        th.Property("purchasesPerMileEmail", th.NumberType),
+        th.Property("revenuePerMileEmail", th.NumberType),
+        th.Property("totalCustomConversions", th.IntegerType),
+        th.Property("uniqueCustomConversions", th.IntegerType),
+        th.Property("averageCustomConversionValue", th.NumberType),
+        th.Property("conversionsEmailHoldOuts", th.NumberType),
+        th.Property("conversionsUniqueEmailsDelivered", th.NumberType),
+        th.Property("sumOfCustomConversions", th.IntegerType),
+    ).to_dict()
+
+    primary_keys = ("campaignId", "experimentId", "templateId")
+
+    # disable default pagination logic as this endpoint response is not JSON (and does
+    # not support pagination anyway)
+    next_page_token_jsonpath = None
+
+    @override
+    def parse_response(self, response):
+        with io.StringIO(response.text) as f:
+            reader = csv.DictReader(f)
+            yield from reader
+
+    @override
+    def post_process(self, row, context=None):
+        row = super().post_process(row, context=context)
+
+        properties = self.schema["properties"]
+
+        for k in list(row.keys()):
+            new_key = k.lower()
+            new_key = new_key.replace("/ m", "per mile")
+            new_key = re.sub(r"\s", "_", new_key)
+            new_key = re.sub(r"[\W]", "", new_key)
+            new_key = humps.camelize(new_key)
+
+            value = row.pop(k)
+
+            if len(value) == 0:
+                value = None
+
+            if value is not None:
+                property_types: list[str] = properties[new_key]["type"]
+
+                if th.IntegerType.__type_name__ in property_types:
+                    value = int(decimal.Decimal(value))
+                elif th.NumberType.__type_name__ in property_types:
+                    value = float(decimal.Decimal(value))
+
+            row[new_key] = value
+
+        return row
