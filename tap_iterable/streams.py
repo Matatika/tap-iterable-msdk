@@ -387,7 +387,13 @@ class SMSReceivedStream(_ExportStream):
     """Define SMS received export stream."""
 
     name = "sms_received"
-    primary_keys = ("messageId",)
+    primary_keys = (
+        "email",
+        "fromPhoneNumber",
+        "toPhoneNumber",
+        "createdAt",
+        "smsMessage",
+    )
 
     data_type_name = "smsReceived"
 
