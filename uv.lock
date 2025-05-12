@@ -478,6 +478,18 @@ wheels = [
 ]
 
 [[package]]
+name = "pytest-github-actions-annotate-failures"
+version = "0.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/39/d4/c54ee6a871eee4a7468e3a8c0dead28e634c0bc2110c694309dcb7563a66/pytest_github_actions_annotate_failures-0.3.0.tar.gz", hash = "sha256:d4c3177c98046c3900a7f8ddebb22ea54b9f6822201b5d3ab8fcdea51e010db7", size = 11248 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6d/73/7b0b15cb8605ee967b34aa1d949737ab664f94e6b0f1534e8339d9e64ab2/pytest_github_actions_annotate_failures-0.3.0-py3-none-any.whl", hash = "sha256:41ea558ba10c332c0bfc053daeee0c85187507b2034e990f21e4f7e5fef044cf", size = 6030 },
+]
+
+[[package]]
 name = "python-dateutil"
 version = "2.9.0.post0"
 source = { registry = "https://pypi.org/simple" }
@@ -797,13 +809,12 @@ wheels = [
 
 [[package]]
 name = "singer-sdk"
-version = "0.44.3"
+version = "0.46.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "backoff", marker = "python_full_version < '4'" },
     { name = "backports-datetime-fromisoformat", marker = "python_full_version < '3.11'" },
     { name = "click" },
-    { name = "fs" },
     { name = "fsspec" },
     { name = "importlib-metadata", marker = "python_full_version < '3.12'" },
     { name = "importlib-resources", marker = "python_full_version < '3.10'" },
@@ -816,15 +827,15 @@ dependencies = [
     { name = "pyyaml" },
     { name = "referencing" },
     { name = "requests" },
-    { name = "setuptools" },
     { name = "simpleeval" },
     { name = "simplejson" },
     { name = "sqlalchemy" },
     { name = "typing-extensions" },
+    { name = "universal-pathlib" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a7/f8/8b0c0a75c749cc0c5f90a1060f79d365ea0b1c2c10a53c8aaeda14735b1f/singer_sdk-0.44.3.tar.gz", hash = "sha256:f2d7eacb4a05270613dc7c02cdcef383f3146e859a14dbdb7c207c90466c7701", size = 1404420 }
+sdist = { url = "https://files.pythonhosted.org/packages/59/fd/fa2663ee3ad1e9f6bfcda91c8db1464e47e865daf4532cb3960a5a312920/singer_sdk-0.46.0.tar.gz", hash = "sha256:e36a21204ce801fe2c58646b75698aa15d92d03db918372eb7b3d3047b6126a1", size = 1449279 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/84/4e/ccbcab1185de53adc6ae4fcc7475a76d2b96b48c24d3df58e134c98fa1fd/singer_sdk-0.44.3-py3-none-any.whl", hash = "sha256:25cdde6552750485aaa0c98f5c5ba6bdd7e4c69e982c7d4c2631c6df3e64b1ae", size = 182898 },
+    { url = "https://files.pythonhosted.org/packages/e8/09/3d81cde02c4cfbe56aeebe341a03d3b97de8d47fe233b41185a9173492d8/singer_sdk-0.46.0-py3-none-any.whl", hash = "sha256:f49c5b53cb7bfcfb6ca30cbd77a399f2174e1d49eb93fea2cdd2bd75534dee7e", size = 190153 },
 ]
 
 [package.optional-dependencies]
@@ -912,6 +923,12 @@ s3 = [
 [package.dev-dependencies]
 dev = [
     { name = "pytest" },
+    { name = "pytest-github-actions-annotate-failures" },
+    { name = "singer-sdk", extra = ["testing"] },
+]
+test = [
+    { name = "pytest" },
+    { name = "pytest-github-actions-annotate-failures" },
     { name = "singer-sdk", extra = ["testing"] },
 ]
 
@@ -920,13 +937,19 @@ requires-dist = [
     { name = "fs-s3fs", marker = "extra == 's3'", specifier = "~=1.1.1" },
     { name = "pyhumps", specifier = ">=3.8.0" },
     { name = "requests", specifier = "~=2.32.3" },
-    { name = "singer-sdk", specifier = "~=0.44.3" },
+    { name = "singer-sdk", specifier = "~=0.46.0" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "pytest", specifier = ">=8" },
-    { name = "singer-sdk", extras = ["testing"], specifier = "~=0.44.3" },
+    { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3" },
+    { name = "singer-sdk", extras = ["testing"] },
+]
+test = [
+    { name = "pytest", specifier = ">=8" },
+    { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3" },
+    { name = "singer-sdk", extras = ["testing"] },
 ]
 
 [[package]]
@@ -975,6 +998,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/df/db/f35a00659bc03fec321ba8bce9420de607a1d37f8342eee1863174c69557/typing_extensions-4.12.2.tar.gz", hash = "sha256:1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8", size = 85321 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/26/9f/ad63fc0248c5379346306f8668cda6e2e2e9c95e01216d2b8ffd9ff037d0/typing_extensions-4.12.2-py3-none-any.whl", hash = "sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d", size = 37438 },
+]
+
+[[package]]
+name = "universal-pathlib"
+version = "0.2.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "fsspec" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/eb/21/dd871495af3933e585261adce42678dcdf1168c9d6fa0a8f7b6565e54472/universal_pathlib-0.2.6.tar.gz", hash = "sha256:50817aaeaa9f4163cb1e76f5bdf84207fa05ce728b23fd779479b3462e5430ac", size = 175427 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e5/4d/2e577f6db7aa0f932d19f799c18f604b2b302c65f733419b900ec07dbade/universal_pathlib-0.2.6-py3-none-any.whl", hash = "sha256:700dec2b58ef34b87998513de6d2ae153b22f083197dfafb8544744edabd1b18", size = 50087 },
 ]
 
 [[package]]
