@@ -163,6 +163,7 @@ class EmailTemplatesStream(IterableStream):
     path = "/templates/email/get"
     schema_filepath = SCHEMAS_DIR / "email_templates.json"
     primary_keys = ("templateId",)
+    state_partitioning_keys = ()
 
     @override
     def get_records(self, context):
