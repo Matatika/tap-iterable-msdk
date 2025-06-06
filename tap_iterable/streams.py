@@ -551,7 +551,7 @@ class ExperimentMetrics(IterableStream):
         th.Property("sumOfCustomConversions", th.IntegerType),
     ).to_dict()
 
-    primary_keys = ("campaignId", "experimentId", "templateId")
+    primary_keys = ("experimentId", "templateId")
     replication_key = "lastModified"
 
     # disable default pagination logic as this endpoint response is not JSON (and does
