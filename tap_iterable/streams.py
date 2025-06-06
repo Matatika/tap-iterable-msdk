@@ -19,6 +19,7 @@ from singer_sdk import typing as th
 from singer_sdk.streams import Stream
 from typing_extensions import override
 
+from tap_iterable import BufferDeque
 from tap_iterable.client import IterableStream
 
 if TYPE_CHECKING:
@@ -82,6 +83,7 @@ class ListUsersStream(IterableStream):
         row["listId"] = context["listId"]
         return row
 
+
 class CampaignsStream(IterableStream):
     """Define campaigns stream."""
 
@@ -91,6 +93,28 @@ class CampaignsStream(IterableStream):
     schema_filepath = SCHEMAS_DIR / "campaigns.json"
     primary_keys = ("id",)
     replication_key = "updatedAt"
+
+    @override
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._campaign_ids_buffer = BufferDeque(maxlen=400)
+
+    @override
+    def parse_response(self, response):
+        for record in super().parse_response(response):
+            yield record
+
+        # make sure we process the remaining buffer entries
+        self._campaign_ids_buffer.finalize()
+        yield record  # yield last record again to force child context generation
+
+    @override
+    def generate_child_contexts(self, record, context):
+        self._campaign_ids_buffer.append(record["id"])
+
+        with self._campaign_ids_buffer as buf:
+            if buf.flush:
+                yield {"campaign_ids": buf}
 
 
 class ChannelsStream(IterableStream):
@@ -483,6 +507,7 @@ class CustomEventStream(_ExportStream):
 class ExperimentMetrics(IterableStream):
     """Define experiment metrics stream."""
 
+    parent_stream_type = CampaignsStream
     name = "experiment_metrics"
     path = "/experiments/metrics"
 
@@ -553,6 +578,13 @@ class ExperimentMetrics(IterableStream):
             yield from super().get_records(context)
         except _ResumableAPIError as e:
             self.logger.warning(e)
+
+    @override
+    def get_url_params(self, context, next_page_token):
+        params = super().get_url_params(context, next_page_token)
+        params["campaignId"] = context["campaign_ids"]
+
+        return params
 
     @override
     def validate_response(self, response):
