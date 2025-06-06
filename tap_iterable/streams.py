@@ -491,6 +491,7 @@ class ExperimentMetrics(IterableStream):
     """Define experiment metrics stream."""
 
     parent_stream_type = CampaignsStream
+    state_partitioning_keys = ()
     name = "experiment_metrics"
     path = "/experiments/metrics"
 
