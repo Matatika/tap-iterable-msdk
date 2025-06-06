@@ -596,8 +596,12 @@ class ExperimentMetrics(IterableStream):
     @override
     def parse_response(self, response):
         with io.StringIO(response.text) as f:
-            reader = csv.DictReader(f)
-            yield from reader
+            for row in csv.DictReader(f):
+                # remove extra values
+                if None in row:
+                    del row[None]
+
+                yield row
 
     @override
     def post_process(self, row, context=None):
