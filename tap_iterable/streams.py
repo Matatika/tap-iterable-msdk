@@ -85,14 +85,16 @@ class CampaignsStream(IterableStream):
     @override
     def parse_response(self, response):
         last_record = None
+
         for record in super().parse_response(response):
             last_record = record
             yield record
 
         # make sure we process the remaining buffer entries
         self._campaign_ids_buffer.finalize()
+
         # yield last record again to force child context generation
-        if last_record is not None:
+        if last_record:
             yield last_record
 
     @override
