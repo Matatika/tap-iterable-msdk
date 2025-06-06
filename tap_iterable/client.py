@@ -134,11 +134,11 @@ class IterableStream(RESTStream):
                 continue
 
             if isinstance(value, int):
-                date_time = datetime.fromtimestamp(
+                value = datetime.fromtimestamp(
                     value / 1000,  # assume timestamp in milliseconds
                     tz=timezone.utc,
-                )
+                ).isoformat()
 
-            row[name] = date_time.isoformat()
+            row[name] = value
 
         return row
