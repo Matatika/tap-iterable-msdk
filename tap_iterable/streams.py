@@ -9,34 +9,18 @@ import json
 import math
 import re
 import tempfile
-from http import HTTPStatus
 from importlib import resources
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import humps
 from singer_sdk import typing as th
 from singer_sdk.streams import Stream
 from typing_extensions import override
 
+from tap_iterable import BufferDeque
 from tap_iterable.client import IterableStream
 
-if TYPE_CHECKING:
-    import requests
-
 SCHEMAS_DIR = resources.files(__package__) / "schemas"
-
-
-class _ResumableAPIError(Exception):
-    def __init__(self, response: requests.Response) -> None:
-        msg = f"Resuming from API {response.status_code} {response.reason} response"
-
-        if response.text:
-            msg += f": {response.text}"
-
-        super().__init__(msg)
-
-        self.response = response
 
 
 class ListsStream(IterableStream):
@@ -82,6 +66,7 @@ class ListUsersStream(IterableStream):
         row["listId"] = context["listId"]
         return row
 
+
 class CampaignsStream(IterableStream):
     """Define campaigns stream."""
 
@@ -91,6 +76,28 @@ class CampaignsStream(IterableStream):
     schema_filepath = SCHEMAS_DIR / "campaigns.json"
     primary_keys = ("id",)
     replication_key = "updatedAt"
+
+    @override
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._campaign_ids_buffer = BufferDeque(maxlen=400)
+
+    @override
+    def parse_response(self, response):
+        for record in super().parse_response(response):
+            yield record
+
+        # make sure we process the remaining buffer entries
+        self._campaign_ids_buffer.finalize()
+        yield record  # yield last record again to force child context generation
+
+    @override
+    def generate_child_contexts(self, record, context):
+        self._campaign_ids_buffer.append(record["id"])
+
+        with self._campaign_ids_buffer as buf:
+            if buf.flush:
+                yield {"campaign_ids": buf}
 
 
 class ChannelsStream(IterableStream):
@@ -483,6 +490,8 @@ class CustomEventStream(_ExportStream):
 class ExperimentMetrics(IterableStream):
     """Define experiment metrics stream."""
 
+    parent_stream_type = CampaignsStream
+    state_partitioning_keys = ()
     name = "experiment_metrics"
     path = "/experiments/metrics"
 
@@ -512,7 +521,9 @@ class ExperimentMetrics(IterableStream):
         th.Property("emailOpenRate", th.NumberType),
         th.Property("uniqueEmailOpenRate", th.NumberType),
         th.Property("totalEmailsClicked", th.IntegerType),
+        th.Property("totalEmailsClickedFiltered", th.IntegerType),
         th.Property("uniqueEmailClicks", th.IntegerType),
+        th.Property("uniqueEmailClicksFiltered", th.IntegerType),
         th.Property("clicksOpens", th.NumberType),
         th.Property("emailClickRate", th.NumberType),
         th.Property("uniqueEmailClickRate", th.NumberType),
@@ -548,24 +559,21 @@ class ExperimentMetrics(IterableStream):
     next_page_token_jsonpath = None
 
     @override
-    def get_records(self, context):
-        try:
-            yield from super().get_records(context)
-        except _ResumableAPIError as e:
-            self.logger.warning(e)
+    def get_url_params(self, context, next_page_token):
+        params = super().get_url_params(context, next_page_token)
+        params["campaignId"] = context["campaign_ids"]
 
-    @override
-    def validate_response(self, response):
-        if response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR:
-            raise _ResumableAPIError(response)
-
-        return super().validate_response(response)
+        return params
 
     @override
     def parse_response(self, response):
         with io.StringIO(response.text) as f:
-            reader = csv.DictReader(f)
-            yield from reader
+            for row in csv.DictReader(f):
+                # remove extra values
+                if None in row:
+                    del row[None]
+
+                yield row
 
     @override
     def post_process(self, row, context=None):
