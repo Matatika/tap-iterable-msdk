@@ -8,7 +8,6 @@ from tap_iterable.tap import TapIterable
 
 SAMPLE_CONFIG = {
     "start_date": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d"),
-    # TODO: Initialize minimal tap config
 }
 
 
@@ -17,6 +16,3 @@ TestTapIterable = get_tap_test_class(
     tap_class=TapIterable,
     config=SAMPLE_CONFIG,
 )
-
-
-# TODO: Create additional tests as appropriate for your tap.
