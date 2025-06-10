@@ -17,8 +17,9 @@ SCHEMAS_DIR = resources.files(__package__) / "schemas"
 class IterableStream(RESTStream):
     """Iterable stream class."""
 
-    # Update this value if necessary or override `get_new_paginator`.
-    next_page_token_jsonpath = "$.next_page"  # noqa: S105
+    # disable default pagination logic as some endpoints responses are not JSON (and
+    # none support pagination anyway)
+    next_page_token_jsonpath = None
 
     @override
     @cached_property

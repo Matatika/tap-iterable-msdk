@@ -46,10 +46,6 @@ class ListUsersStream(IterableStream):
     schema_filepath = SCHEMAS_DIR / "list_users.json"
     primary_keys = ("email", "listId")
 
-    # disable default pagination logic as this endpoint response is not JSON (and does
-    # not support pagination anyway)
-    next_page_token_jsonpath = None
-
     @override
     def get_url_params(self, context, next_page_token):
         params = super().get_url_params(context, next_page_token)
@@ -232,10 +228,6 @@ class _ExportStream(IterableStream):
 
     path = "/export/data.json"
     replication_key = "createdAt"
-
-    # disable default pagination logic to prevent error accessing response content after
-    # the connection is released (see `parse_response`)
-    next_page_token_jsonpath = None
 
     data_type_name: str = ...
 
@@ -553,10 +545,6 @@ class ExperimentMetrics(IterableStream):
 
     primary_keys = ("experimentId", "templateId")
     replication_key = "lastModified"
-
-    # disable default pagination logic as this endpoint response is not JSON (and does
-    # not support pagination anyway)
-    next_page_token_jsonpath = None
 
     @override
     def get_url_params(self, context, next_page_token):
