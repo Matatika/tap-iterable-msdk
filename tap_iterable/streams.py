@@ -229,7 +229,7 @@ class _ExportStream(IterableStream):
     path = "/export/data.json"
     replication_key = "createdAt"
 
-    data_type_name: str = ...
+    data_type_name: str
 
     @override
     @property
