@@ -2,22 +2,14 @@
 
 from __future__ import annotations
 
-import decimal
-import typing as t
 from datetime import datetime, timezone
 from functools import cached_property
 from importlib import resources
 
 from singer_sdk.authenticators import APIKeyAuthenticator
-from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import BaseAPIPaginator  # noqa: TC002
 from singer_sdk.streams import RESTStream
 from typing_extensions import override
-
-if t.TYPE_CHECKING:
-    import requests
-    from singer_sdk.helpers.types import Context
-
 
 SCHEMAS_DIR = resources.files(__package__) / "schemas"
 
@@ -25,8 +17,9 @@ SCHEMAS_DIR = resources.files(__package__) / "schemas"
 class IterableStream(RESTStream):
     """Iterable stream class."""
 
-    # Update this value if necessary or override `get_new_paginator`.
-    next_page_token_jsonpath = "$.next_page"  # noqa: S105
+    # disable default pagination logic as some endpoints responses are not JSON (and
+    # none support pagination anyway)
+    next_page_token_jsonpath = None
 
     @override
     @cached_property
@@ -80,40 +73,6 @@ class IterableStream(RESTStream):
             params["startDateTime"] = start_date.strftime(r"%Y-%m-%d %H:%M:%S")
 
         return params
-
-    def prepare_request_payload(
-        self,
-        context: Context | None,  # noqa: ARG002
-        next_page_token: t.Any | None,  # noqa: ARG002, ANN401
-    ) -> dict | None:
-        """Prepare the data payload for the REST API request.
-
-        By default, no payload will be sent (return None).
-
-        Args:
-            context: The stream context.
-            next_page_token: The next page index or value.
-
-        Returns:
-            A dictionary with the JSON body for a POST requests.
-        """
-        # TODO: Delete this method if no payload is required. (Most REST APIs.)
-        return None
-
-    def parse_response(self, response: requests.Response) -> t.Iterable[dict]:
-        """Parse the response and return an iterator of result records.
-
-        Args:
-            response: The HTTP ``requests.Response`` object.
-
-        Yields:
-            Each record from the source.
-        """
-        # TODO: Parse response body and return a set of records.
-        yield from extract_jsonpath(
-            self.records_jsonpath,
-            input=response.json(parse_float=decimal.Decimal),
-        )
 
     @cached_property
     def _date_time_properties(self):
