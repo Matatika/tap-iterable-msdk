@@ -82,7 +82,8 @@
         "Finished",
         "Starting",
         "Aborted",
-        "Recurring"
+        "Recurring",
+        "Archived"
       ]
     },
     "listIds": {
