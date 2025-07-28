@@ -161,8 +161,10 @@ class TemplatesStream(IterableStream):
 
     @override
     def get_child_context(self, record, context):
-        return {**context, "templateId": record["templateId"]}
+        if context["messageMedium"] == "Email":
+            return {**context, "templateId": record["templateId"]}
 
+        return None
 
 class EmailTemplatesStream(IterableStream):
     """Define email templates stream."""
@@ -173,13 +175,6 @@ class EmailTemplatesStream(IterableStream):
     schema_filepath = SCHEMAS_DIR / "email_templates.json"
     primary_keys = ("templateId",)
     state_partitioning_keys = ()
-
-    @override
-    def get_records(self, context):
-        if context["messageMedium"] != "Email":
-            return
-
-        yield from super().get_records(context)
 
     @override
     def get_url_params(self, context, next_page_token):
