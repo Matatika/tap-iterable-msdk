@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import decimal
 import io
+import itertools
 import json
 import math
 import re
@@ -116,16 +117,20 @@ class MessageTypesStream(IterableStream):
     primary_keys = ("id",)
 
 
-class _MessageMediumsStream(Stream):
-    """Define message mediums stream."""
+class _TemplatesContextStream(Stream):
+    """Define templates context stream."""
 
-    name = "_message_mediums"
+    name = "_templates_context"
     schema = th.ObjectType().to_dict()
     selected = False  # use for context generation only
 
     @override
     def get_records(self, context):
-        yield from ({"messageMedium": m} for m in ["Email", "Push", "InApp", "SMS"])
+        template_types = ["Base", "Blast", "Triggered", "Workflow"]
+        message_mediums = ["Email", "Push", "InApp", "SMS"]
+
+        for tt, mm in itertools.product(template_types, message_mediums):
+            yield {"templateType": tt, "messageMedium": mm}
 
     @override
     def get_child_context(self, record, context):
@@ -135,7 +140,7 @@ class _MessageMediumsStream(Stream):
 class TemplatesStream(IterableStream):
     """Define templates stream."""
 
-    parent_stream_type = _MessageMediumsStream
+    parent_stream_type = _TemplatesContextStream
     name = "templates"
     path = "/templates"
     records_jsonpath = "$.templates[*]"
@@ -146,6 +151,7 @@ class TemplatesStream(IterableStream):
     @override
     def get_url_params(self, context, next_page_token):
         params = super().get_url_params(context, next_page_token)
+        params["templateType"] = context["templateType"]
         params["messageMedium"] = context["messageMedium"]
 
         if start_date := self.get_starting_timestamp(context):
