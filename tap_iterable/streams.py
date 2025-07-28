@@ -166,6 +166,16 @@ class TemplatesStream(IterableStream):
 
         return None
 
+    @override
+    def _sync_children(self, child_context):
+        if child_context is None:
+            return
+
+        for child_stream in self.child_streams:
+            if child_stream.selected or child_stream.has_selected_descendents:
+                child_stream.sync(context=child_context)
+
+
 class EmailTemplatesStream(IterableStream):
     """Define email templates stream."""
 
