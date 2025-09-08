@@ -239,6 +239,12 @@
         "null",
         "integer"
       ]
+    },
+    "isBot": {
+      "type": [
+        "null",
+        "boolean"
+      ]
     }
   }
 }

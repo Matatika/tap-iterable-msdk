@@ -92,6 +92,12 @@
         "null",
         "string"
       ]
+    },
+    "isBot": {
+      "type": [
+        "null",
+        "boolean"
+      ]
     }
   }
 }
