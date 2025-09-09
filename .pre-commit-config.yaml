@@ -26,7 +26,7 @@ repos:
   - id: check-github-workflows
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.12.11
+  rev: v0.12.12
   hooks:
   - id: ruff
     args: [--fix, --exit-non-zero-on-fix, --show-fixes]
@@ -40,7 +40,7 @@ repos:
     - types-requests
 
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.8.14
+  rev: 0.8.15
   hooks:
   - id: uv-lock
   - id: uv-sync
