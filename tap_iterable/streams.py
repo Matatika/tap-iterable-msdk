@@ -10,6 +10,7 @@ import json
 import math
 import re
 import tempfile
+from datetime import timedelta
 from importlib import resources
 from pathlib import Path
 
@@ -20,6 +21,7 @@ from typing_extensions import override
 
 from tap_iterable import BufferDeque
 from tap_iterable.client import IterableStream
+from tap_iterable.pagination import DateTimeIntervalPaginator, DateTimeIntervalTokenType
 
 SCHEMAS_DIR = resources.files(__package__) / "schemas"
 
@@ -248,14 +250,21 @@ class _ExportStream(IterableStream):
         return SCHEMAS_DIR / f"{self.name}.json"
 
     @override
-    def get_url_params(self, context, next_page_token):
-        params = super().get_url_params(context, next_page_token)
-        params["dataTypeName"] = self.data_type_name
+    def get_new_paginator(self):
+        return DateTimeIntervalPaginator(
+            start=self.get_starting_timestamp(self.context),
+            interval=timedelta(days=7),  # TODO: make this configurable
+        )
 
-        if "startDateTime" not in params:
-            params["range"] = "All"
+    @override
+    def get_url_params(self, context, next_page_token: DateTimeIntervalTokenType):
+        start, end = next_page_token
 
-        return params
+        return {
+            "dataTypeName": self.data_type_name,
+            "startDateTime": start.strftime(r"%Y-%m-%d %H:%M:%S"),
+            "endDateTime": end and end.strftime(r"%Y-%m-%d %H:%M:%S"),
+        }
 
     @override
     def _request(self, prepared_request, context):
@@ -295,6 +304,8 @@ class _ExportStream(IterableStream):
 
             with filepath.open("r") as f:
                 yield from (json.loads(line, parse_float=decimal.Decimal) for line in f)
+
+        self._finalize_state(self.stream_state)
 
     @override
     def post_process(self, row, context=None):
