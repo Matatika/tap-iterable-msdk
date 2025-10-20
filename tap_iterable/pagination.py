@@ -31,8 +31,5 @@ class DateTimeIntervalPaginator(BaseAPIPaginator[DateTimeIntervalTokenType]):
     def _get_date_range(self, start: datetime) -> DateTimeIntervalTokenType:
         end = start + self.interval
 
-        if end >= datetime.now(tz=timezone.utc):
-            end = None
-
         # `startDateTime` is inclusive, `endDateTime` is exclusive
-        return start, end
+        return start, end if end < datetime.now(tz=timezone.utc) else None
