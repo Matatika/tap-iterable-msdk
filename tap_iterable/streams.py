@@ -319,7 +319,7 @@ class EmailBounceStream(_ExportStream):
     """Define email bounce export stream."""
 
     name = "email_bounce"
-    primary_keys = ("messageId",)
+    primary_keys = ("messageId", "createdAt", "recipientState")
 
     data_type_name = "emailBounce"
 
@@ -328,7 +328,7 @@ class EmailClickStream(_ExportStream):
     """Define email click export stream."""
 
     name = "email_click"
-    primary_keys = ("messageId",)
+    primary_keys = ("messageId", "createdAt", "email", "url", "ip", "userAgent")
 
     data_type_name = "emailClick"
 
@@ -337,7 +337,7 @@ class EmailComplaintStream(_ExportStream):
     """Define email complaint export stream."""
 
     name = "email_complaint"
-    primary_keys = ("messageId",)
+    primary_keys = ("messageId", "createdAt")
 
     data_type_name = "emailComplaint"
 
@@ -346,7 +346,7 @@ class EmailOpenStream(_ExportStream):
     """Define email open export stream."""
 
     name = "email_open"
-    primary_keys = ("messageId",)
+    primary_keys = ("messageId", "createdAt", "email", "ip", "userAgent")
 
     data_type_name = "emailOpen"
 
@@ -355,7 +355,7 @@ class EmailSendStream(_ExportStream):
     """Define email send export stream."""
 
     name = "email_send"
-    primary_keys = ("messageId",)
+    primary_keys = ("messageId", "createdAt", "email")
 
     data_type_name = "emailSend"
 
@@ -364,7 +364,7 @@ class EmailSendSkipStream(_ExportStream):
     """Define email send skip export stream."""
 
     name = "email_send_skip"
-    primary_keys = ("messageId",)
+    primary_keys = ("messageId", "createdAt", "email")
 
     data_type_name = "emailSendSkip"
 
@@ -373,7 +373,7 @@ class EmailSubscribeStream(_ExportStream):
     """Define email subscribe export stream."""
 
     name = "email_subscribe"
-    primary_keys = ("createdAt", "email")
+    primary_keys = ("createdAt", "email", "signupSource", "emailListIds")
 
     data_type_name = "emailSubscribe"
 
@@ -382,7 +382,7 @@ class EmailUnsubscribeStream(_ExportStream):
     """Define email unsubscribe export stream."""
 
     name = "email_unsubscribe"
-    primary_keys = ("createdAt", "email")
+    primary_keys = ("createdAt", "email", "unsubSource", "emailListIds", "channelIds")
 
     data_type_name = "emailUnsubscribe"
 
@@ -391,7 +391,7 @@ class SMSBounceStream(_ExportStream):
     """Define SMS bounce export stream."""
 
     name = "sms_bounce"
-    primary_keys = ("messageId",)
+    primary_keys = ("messageId", "createdAt", "email")
 
     data_type_name = "smsBounce"
 
@@ -400,7 +400,7 @@ class SMSClickStream(_ExportStream):
     """Define SMS click export stream."""
 
     name = "sms_click"
-    primary_keys = ("messageId",)
+    primary_keys = ("messageId", "createdAt", "email", "clickedUrl")
 
     data_type_name = "smsClick"
 
@@ -409,13 +409,7 @@ class SMSReceivedStream(_ExportStream):
     """Define SMS received export stream."""
 
     name = "sms_received"
-    primary_keys = (
-        "email",
-        "fromPhoneNumber",
-        "toPhoneNumber",
-        "createdAt",
-        "smsMessage",
-    )
+    primary_keys = ("createdAt", "email", "smsMessage")
 
     data_type_name = "smsReceived"
 
@@ -424,7 +418,7 @@ class SMSSendStream(_ExportStream):
     """Define SMS send export stream."""
 
     name = "sms_send"
-    primary_keys = ("messageId",)
+    primary_keys = ("messageId", "createdAt", "email")
 
     data_type_name = "smsSend"
 
@@ -433,7 +427,7 @@ class SMSSendSkipStream(_ExportStream):
     """Define SMS send skip export stream."""
 
     name = "sms_send_skip"
-    primary_keys = ("messageId",)
+    primary_keys = ("messageId", "createdAt", "email")
 
     data_type_name = "smsSendSkip"
 
