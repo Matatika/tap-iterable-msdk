@@ -240,6 +240,12 @@
         "integer"
       ]
     },
+    "clickedUrl": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
     "isBot": {
       "type": [
         "null",
