@@ -308,7 +308,19 @@ class _ExportStream(IterableStream):
         self._finalize_state(self.stream_state)
 
     @override
-    def post_process(self, row, context=None):
+    def post_process(self, row: dict, context=None):
+        if self.primary_keys and (
+            bad_keys := [k for k in self.primary_keys if row.get(k) is None]
+        ):
+            self.logger.warning(
+                (
+                    "Missing or no value for stream primary key properties %s in row, "
+                    "skipping"
+                ),
+                bad_keys,
+            )
+            return None
+
         if transactional_data := row.get("transactionalData"):
             row["transactionalData"] = json.loads(transactional_data)
 
