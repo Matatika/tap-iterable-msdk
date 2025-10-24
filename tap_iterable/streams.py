@@ -459,6 +459,60 @@ class WebPushSendSkipStream(_ExportStream):
     data_type_name = "webPushSendSkip"
 
 
+class WhatsAppBounceStream(_ExportStream):
+    """Define WhatsApp bounce export stream."""
+
+    name = "whatsapp_bounce"
+    primary_keys = ("messageId", "createdAt", "email")
+
+    data_type_name = "whatsAppBounce"
+
+
+class WhatsAppClickStream(_ExportStream):
+    """Define WhatsApp click export stream."""
+
+    name = "whatsapp_click"
+    primary_keys = ("messageId", "createdAt", "email")
+
+    data_type_name = "whatsAppClick"
+
+
+class WhatsAppReceivedStream(_ExportStream):
+    """Define WhatsApp received export stream."""
+
+    name = "whatsapp_received"
+    primary_keys = ("replyToMessageId", "createdAt", "email")
+
+    data_type_name = "whatsAppReceived"
+
+
+class WhatsAppSeenStream(_ExportStream):
+    """Define WhatsApp seen export stream."""
+
+    name = "whatsapp_seen"
+    primary_keys = ("seenMessageId", "createdAt", "email")
+
+    data_type_name = "whatsAppSeen"
+
+
+class WhatsAppSendStream(_ExportStream):
+    """Define WhatsApp send export stream."""
+
+    name = "whatsapp_send"
+    primary_keys = ("messageId", "createdAt", "email")
+
+    data_type_name = "whatsAppSend"
+
+
+class WhatsAppSendSkipStream(_ExportStream):
+    """Define WhatsApp send skip export stream."""
+
+    name = "whatsapp_send_skip"
+    primary_keys = ("messageId", "createdAt", "email")
+
+    data_type_name = "whatsAppSendSkip"
+
+
 class UsersStream(_ExportStream):
     """Define users export stream."""
 
