@@ -28,6 +28,10 @@ class DateTimeIntervalPaginator(BaseAPIPaginator[DateTimeIntervalTokenType]):
 
         return self._get_date_range(end_date)
 
+    @override
+    def continue_if_empty(self, response):
+        return True
+
     def _get_date_range(self, start: datetime) -> DateTimeIntervalTokenType:
         end = start + self.interval
 
