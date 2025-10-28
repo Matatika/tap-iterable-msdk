@@ -287,6 +287,10 @@ class _ExportStream(IterableStream):
         return response
 
     @override
+    def backoff_max_tries(self):
+        return 8
+
+    @override
     def parse_response(self, response):
         with tempfile.TemporaryDirectory(prefix=f"{self.tap_name}-") as tmpdir:
             filepath = Path(tmpdir) / f"{self.name}.jsonl"
