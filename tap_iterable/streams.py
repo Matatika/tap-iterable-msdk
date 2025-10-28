@@ -331,7 +331,7 @@ class EmailBounceStream(_ExportStream):
     """Define email bounce export stream."""
 
     name = "email_bounce"
-    primary_keys = ("messageId", "createdAt", "recipientState")
+    primary_keys = ("messageId", "createdAt", "email", "recipientState")
 
     data_type_name = "emailBounce"
 
@@ -349,7 +349,7 @@ class EmailComplaintStream(_ExportStream):
     """Define email complaint export stream."""
 
     name = "email_complaint"
-    primary_keys = ("messageId", "createdAt")
+    primary_keys = ("messageId", "createdAt", "email")
 
     data_type_name = "emailComplaint"
 
