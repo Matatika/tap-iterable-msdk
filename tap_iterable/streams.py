@@ -540,7 +540,10 @@ class UsersStream(_ExportStream):
 
     @override
     def post_process(self, row, context=None):
-        row: dict[str] = super().post_process(row, context)
+        row = super().post_process(row, context)
+
+        if row is None:
+            return None
 
         # loosely following convention from https://api.iterable.com/api/docs#users_getUserById,
         # use a `dataFields` schema property as to encapsulate all project-specific user
