@@ -79,7 +79,7 @@ class CampaignsStream(IterableStream):
     @override
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._campaign_ids_buffer = BufferDeque(maxlen=400)
+        self._campaign_ids_buffer = BufferDeque(maxlen=200)
 
     @override
     def parse_response(self, response):
