@@ -247,8 +247,7 @@
       "type": [
         "null",
         "string"
-      ],
-      "format": "ipv4"
+      ]
     },
     "locale": {
       "type": [
