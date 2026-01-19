@@ -20,7 +20,7 @@ classifiers = [
 license-files = [ "LICENSE" ]
 requires-python = ">=3.9"
 dependencies = [
-    "singer-sdk~=0.48.0",
+    "singer-sdk~=0.48.1",
     "requests~=2.32.3",
     "pyhumps>=3.8.0",
 ]
