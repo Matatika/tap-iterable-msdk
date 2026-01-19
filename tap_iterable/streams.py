@@ -643,6 +643,10 @@ class ExperimentMetrics(IterableStream):
         return params
 
     @override
+    def backoff_max_tries(self):
+        return 8
+
+    @override
     def parse_response(self, response):
         with io.StringIO(response.text) as f:
             for row in csv.DictReader(f):
