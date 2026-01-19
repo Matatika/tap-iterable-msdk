@@ -931,7 +931,7 @@ test = [
 requires-dist = [
     { name = "fs-s3fs", marker = "extra == 's3'", specifier = "~=1.1.1" },
     { name = "pyhumps", specifier = ">=3.8.0" },
-    { name = "requests", specifier = "~=2.32.3" },
+    { name = "requests", specifier = "~=2.32.5" },
     { name = "singer-sdk", specifier = "~=0.48.1" },
 ]
 provides-extras = ["s3"]
