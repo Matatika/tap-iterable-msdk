@@ -39,7 +39,7 @@ dev = [
 ]
 test = [
     "pytest>=8",
-    "pytest-github-actions-annotate-failures>=0.3",
+    "pytest-github-actions-annotate-failures>=0.4.2",
     "singer-sdk[testing]",
 ]
 
