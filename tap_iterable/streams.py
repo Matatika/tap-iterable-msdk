@@ -638,7 +638,9 @@ class ExperimentMetrics(IterableStream):
     @override
     def get_url_params(self, context, next_page_token):
         params = super().get_url_params(context, next_page_token)
-        params["campaignId"] = context["campaign_ids"]
+        # must be a list - the SDK only expands list/tuple params into repeated
+        # query params, anything else is stringified
+        params["campaignId"] = list(context["campaign_ids"])
 
         return params
 
